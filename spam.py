@@ -1,3 +1,4 @@
+#Assumptions: a List Data structure has been used to contain the input dataset, intermediate and final results.
 
 n_customers = 4   #SID
 n_attributes = 2  #a,b,c,d,e,f
@@ -23,6 +24,7 @@ v_dataset[1][1] = [0,1]
 v_dataset[1][2] = [0,2]
 v_dataset[1][3] = [1]
 
+print('\nDataset: \n')
 print(v_dataset)
 
 
@@ -113,6 +115,8 @@ def search(v_pat, pat, Sn, In, minsup, mined_sequences):
 
     return mined_sequences
 
+print('\nFrequent sequential patterns mined:\n')
 print(spam(v_dataset, 3))
+
 
 
