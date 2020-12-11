@@ -95,30 +95,24 @@ def search(v_pat, pat, Sn, In, minsup, mined_sequences):
         try:
             Stemp2 = Stemp[:] # copying by value
             Stemp2.remove(item)
-            print("s",item, Stemp, Stemp2)
         except ValueError:
             pass
-        pat += "_"
-        pat += str(item)
-        search(s_extension(v_pat, v_dataset[item]),pat , Stemp, Stemp2, minsup, mined_sequences)
+
+        search(s_extension(v_pat, v_dataset[item]),pat+"_"+str(item) , Stemp, Stemp2, minsup, mined_sequences)
 
     for item in In:
         if getSupport(i_extension(v_pat, v_dataset[item])) >= minsup:
             Itemp.append(item)
     for item in Itemp:
-        print(Itemp)
         try:
             Itemp2 = Itemp[:]
             Itemp2.remove(item)
-            print("i",item,Itemp,Itemp2)
         except ValueError:
             pass
-        pat += str(item)
-        search(i_extension(v_pat,v_dataset[item]),pat, Itemp, Itemp2, minsup, mined_sequences)
+        search(i_extension(v_pat,v_dataset[item]),pat+str(item), Itemp, Itemp2, minsup, mined_sequences)
 
     return mined_sequences
 
 print(spam(v_dataset, 3))
 
-print(s_extension(s_extension(v_dataset[0],v_dataset[1]),v_dataset[1]))
 
