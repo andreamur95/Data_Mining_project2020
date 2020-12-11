@@ -1,11 +1,10 @@
 #Assumptions: a List Data structure has been used to contain the input dataset, intermediate and final results.
-# chosen minsup: 3
+
 n_customers = 4   #SID
 n_attributes = 2  #a,b,c,d,e,f
 max_transactions = 5 # number of entries in itemsets cell
 
 v_dataset = []
-
 
 
 v_dataset.append([]) #item 0
@@ -23,9 +22,6 @@ v_dataset[1][0] = [1,3]
 v_dataset[1][1] = [0,1]
 v_dataset[1][2] = [0,2]
 v_dataset[1][3] = [1]
-
-print('\nDataset: \n')
-print(v_dataset)
 
 
 def getSupport(v_item):
@@ -70,6 +66,11 @@ def i_extension(v_item1, v_item2):
     return result
 
 def spam(dataset, minsup):
+    print ("\nSPAM function call for:")
+    print("Dataset:")
+    print(dataset)
+    print("Minsup:")
+    print(minsup)
     frequent_items = []
     result = []
     for item_id in range(n_attributes):
@@ -83,6 +84,8 @@ def spam(dataset, minsup):
             pass
         pat = str(item)
         result = search(dataset[item], pat, frequent_items, frequent_items2, minsup, result)
+    print('\nFrequent sequential patterns mined:')
+    print(result)
     return result
 
 # v_pat is defined vertically
@@ -115,8 +118,5 @@ def search(v_pat, pat, Sn, In, minsup, mined_sequences):
 
     return mined_sequences
 
-print('\nFrequent sequential patterns mined:\n')
-print(spam(v_dataset, 3))
 
-
-
+spam(v_dataset, 3)
