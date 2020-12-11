@@ -1,5 +1,5 @@
 #Assumptions: a List Data structure has been used to contain the input dataset, intermediate and final results.
-
+# chosen minsup: 3
 n_customers = 4   #SID
 n_attributes = 2  #a,b,c,d,e,f
 max_transactions = 5 # number of entries in itemsets cell
