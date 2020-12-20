@@ -1,28 +1,46 @@
 #Assumptions: a List Data structure has been used to contain the input dataset, intermediate and final results.
 # chosen minsup: 3
-n_customers = 4   #SID
-n_attributes = 2  #a,b,c,d,e,f
-max_transactions = 5 # number of entries in itemsets cell
+#n_customers = 4   #SID
+#n_attributes = 2  #a,b,c,d,e,f
+#max_transactions = 5 # number of entries in itemsets cell
+
+import numpy as np
+import re
 
 v_dataset = []
 
+# PREPROCESSING DATASET
+
+f = open("BIBLE.txt","r")
+data = f.read()
+test = re.split(' |\n', data)
+test.pop(len(test)-1)
+
+###### REQUIRE YOUR ATTENTION ######
+for elem in test:
+    if(int(elem) != -2 & int(elem) != -1):
+        v_dataset.append(int(elem))
+    elif(int(elem) == -2):
+       # modify it in order to start another row
+       exit
+
+print(v_dataset)
 
 
-v_dataset.append([]) #item 0
-v_dataset.append([]) #item 1
 
-for i in range(n_customers):
-    v_dataset[0].append([])
-    v_dataset[1].append([])
 
-v_dataset[0][0] = [0,1,2,3]
-v_dataset[0][1] = [0]
-v_dataset[0][2] = [0,1]
-v_dataset[0][3] = [0]
-v_dataset[1][0] = [1,3]
-v_dataset[1][1] = [0,1]
-v_dataset[1][2] = [0,2]
-v_dataset[1][3] = [1]
+#for i in range(n_customers):
+   # v_dataset[0].append([])
+    #v_dataset[1].append([])
+
+#v_dataset[0][0] = [0,1,2,3]
+#v_dataset[0][1] = [0]
+#v_dataset[0][2] = [0,1]
+#v_dataset[0][3] = [0]
+#v_dataset[1][0] = [1,3]
+#v_dataset[1][1] = [0,1]
+#v_dataset[1][2] = [0,2]
+#v_dataset[1][3] = [1]
 
 print('\nDataset: \n')
 print(v_dataset)
