@@ -1,8 +1,6 @@
 #Assumptions: a List Data structure has been used to contain the input dataset, intermediate and final results.
 
-#n_customers = 4   #SID
-#n_attributes = 2  #a,b,c,d,e,f
-#max_transactions = 5 # number of entries in itemsets cell
+
 import re
 import numpy as np
 v_dataset = []
@@ -20,7 +18,7 @@ row = []
 # The list will contain itemsets for each different sequences that is ended by "-2", with "-1" we determine
 # the end of an itemset
 for elem in test:    
-    if(int(elem) != -2 & int(elem) != -1):
+    if(int(elem) != -2 and int(elem) != -1):
         row_element.append(int(elem))
         row.append(row_element)             #  every row is composed by several itemsets (that are list as well)
         row_element = []                    # row is then made by row_element, every row_element is an itemset
@@ -28,9 +26,11 @@ for elem in test:
        v_dataset.append(row)
        row = []
 
-print(v_dataset)
+print(v_dataset[1])
 
-
+#n_customers = 4   #SID
+#n_attributes = 2  #a,b,c,d,e,f
+#max_transactions = 5 # number of entries in itemsets cell
 
 #for i in range(n_customers):
    # v_dataset[0].append([])
