@@ -154,9 +154,11 @@ def display_results(mined_sequences):
     for i in range(no_of_mined_sequences):
         mined_sequences[i] = mined_sequences[i].replace(',_','_')
         mined_sequences[i] = mined_sequences[i].split(':')
-        sequence = mined_sequences[i][0][:-1]
+        raw_sequence = mined_sequences[i][0][:-1]
         support = int(mined_sequences[i][1])
         relative_support = support/n_customers
+
+        sequence = '{' + raw_sequence.replace('_','},{') + '}'
 
         print("%d:" % (i+1))
         print("Sequence: %s" % sequence)
