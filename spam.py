@@ -1,39 +1,67 @@
 #Assumptions: a List Data structure has been used to contain the input dataset, intermediate and final results.
 import re
-import numpy as np
-v_dataset = []
 
-# PREPROCESSING DATASET
 
-f = open("BIBLE.txt","r")
+# n_sequences = 4   #SID
+# n_attributes = 2  #a,b,c,d,e,f
+#
+# v_dataset = []
+#
+# for i in range(n_attributes):
+#     v_dataset.append([]) #item 0,1
+#
+# for i in range(n_sequences):
+#     v_dataset[0].append([])
+#     v_dataset[1].append([])
+#
+# v_dataset[0][0] = [0,1,2,3]
+# v_dataset[0][1] = [0]
+# v_dataset[0][2] = [0,1]
+# v_dataset[0][3] = [0]
+# v_dataset[1][0] = [1,3]
+# v_dataset[1][1] = [0,1]
+# v_dataset[1][2] = [0,2]
+# v_dataset[1][3] = [1]
+
+
+f = open("SIGN.txt","r")
 data = f.read()
-test = re.split(' |\n', data)
-test.pop(len(test)-1) # it removes the very last blank space, needed just to correctly process the values
+data = data.replace('\n',' ')
+data = data.split(' ')
 
-row_element = []
-row = []
+n_sequences = 1
 
-# The list will contain itemsets for each different sequences that is ended by "-2", with "-1" we determine
-# the end of an itemset
-for elem in test:    
-    if(int(elem) != -2 and int(elem) != -1):
-        row_element.append(int(elem))
-        row.append(row_element)             #  every row is composed by several itemsets (that are list as well)
-        row_element = []                    # row is then made by row_element, every row_element is an itemset
-    elif(int(elem) == -2):
-       v_dataset.append(row)
-       row = []
+dataset_length = len(data)
 
-print(v_dataset[1])
+for i in range(dataset_length):
+    item = data[i] = int(data[i])
+    if item == -2:
+        n_sequences+=1
 
-n_customers = 36369   #SID
-n_attributes = 13905  #a,b,c,d,e,f
+n_attributes = max(data)
 
+v_dataset2 = []
+for i in range(n_attributes):
+    v_dataset2.append([])
+    for j in range(n_sequences):
+        v_dataset2[i].append([])
+
+current_pos = 0
+current_seq = 0
+
+for item in data:
+    if int(item) == -1:
+        current_pos += 1
+    elif int(item) == -2:
+        current_pos = 0
+        current_seq += 1
+    else:
+        v_dataset2[int(item) - 1][current_seq].append(current_pos)
 
 
 def getSupport(v_item):
     n = 0
-    for i in range(n_customers):
+    for i in range(n_sequences):
         if len(v_item[i]) > 0:
             n+=1
     return n
@@ -41,10 +69,10 @@ def getSupport(v_item):
 def s_extension(v_item1, v_item2):
     # Prepare result array
     result = []
-    for customer_id in range (n_customers):
+    for customer_id in range (n_sequences):
         result.append([])
 
-    for customer_id in range(n_customers):
+    for customer_id in range(n_sequences):
         # Check if item1 appears for given customer:
         if len(v_item1[customer_id]) == 0:
             continue
@@ -61,10 +89,10 @@ def s_extension(v_item1, v_item2):
 def i_extension(v_item1, v_item2):
     # Prepare result array
     result = []
-    for customer_id in range (n_customers):
+    for customer_id in range (n_sequences):
         result.append([])
     # Check for overlapping itemset indexes
-    for customer_id in range (n_customers):
+    for customer_id in range (n_sequences):
         for entry1 in v_item1[customer_id]:
             for entry2 in v_item2[customer_id]:
                 if entry1 == entry2:
@@ -74,8 +102,8 @@ def i_extension(v_item1, v_item2):
 
 def spam(dataset, minsup):
     print ("\nSPAM function call for:")
-    print("Dataset:")
-    print(dataset)
+ #   print("Dataset:")
+ #   print(dataset)
     print("Minsup:")
     print(minsup)
     frequent_items = []
@@ -92,15 +120,15 @@ def spam(dataset, minsup):
             frequent_items2 = frequent_items[i+1:] #copying by value;
         except ValueError:
             frequent_items2 = []
-        pat = str(frequent_items[i])+','+':'+str(frequent_items_support[i])
-        result = search(dataset[frequent_items[i]], pat, frequent_items, frequent_items2, minsup, result)
+        pat = str(frequent_items[i]+1)+','+':'+str(frequent_items_support[i])
+        result = search(dataset, dataset[frequent_items[i]], pat, frequent_items, frequent_items2, minsup, result)
 
     display_results(result)
 
     return result
 
 # v_pat is defined vertically
-def search(v_pat, pat, Sn, In, minsup, mined_sequences):
+def search(v_dataset, v_pat, pat, Sn, In, minsup, mined_sequences):
     mined_sequences.append(pat)
     pat = pat.split(":")[0]
     Stemp = []
@@ -119,7 +147,7 @@ def search(v_pat, pat, Sn, In, minsup, mined_sequences):
         except ValueError:
             Stemp2 = []
 
-        search(s_extension(v_pat, v_dataset[Stemp[i]]),pat+'_'+str(Stemp[i])+','+':'+str(Stemp_sup[i]), Stemp, Stemp2, minsup, mined_sequences)
+        search(v_dataset, s_extension(v_pat, v_dataset[Stemp[i]]),pat+'_'+str(Stemp[i]+1)+','+':'+str(Stemp_sup[i]), Stemp, Stemp2, minsup, mined_sequences)
 
     for item in In:
         support = getSupport(i_extension(v_pat, v_dataset[item]))
@@ -131,7 +159,7 @@ def search(v_pat, pat, Sn, In, minsup, mined_sequences):
             Itemp2 = Itemp[i+1:]
         except ValueError:
             Itemp2 = []
-        search(i_extension(v_pat,v_dataset[item]),pat+str(item)+','+':'+str(Itemp_sup[i]), Itemp, Itemp2, minsup, mined_sequences)
+        search(v_dataset, i_extension(v_pat,v_dataset[item]),pat+str(Itemp[i]+1)+','+':'+str(Itemp_sup[i]), Itemp, Itemp2, minsup, mined_sequences)
 
     return mined_sequences
 
@@ -142,9 +170,13 @@ def display_results(mined_sequences):
     for i in range(no_of_mined_sequences):
         mined_sequences[i] = mined_sequences[i].replace(',_','_')
         mined_sequences[i] = mined_sequences[i].split(':')
+
+    mined_sequences = sorted(mined_sequences, key=lambda l:l[1], reverse=True) #comment this for sorting via item number
+
+    for i in range(no_of_mined_sequences):
         raw_sequence = mined_sequences[i][0][:-1]
         support = int(mined_sequences[i][1])
-        relative_support = support/n_customers
+        relative_support = support/n_sequences
 
         sequence = '{' + raw_sequence.replace('_','},{') + '}'
 
@@ -155,4 +187,5 @@ def display_results(mined_sequences):
 
 
 
-spam(v_dataset, 3)
+# spam(v_dataset, 3)
+spam(v_dataset2, 400)
