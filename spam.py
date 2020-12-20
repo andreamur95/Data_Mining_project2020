@@ -12,15 +12,21 @@ v_dataset = []
 f = open("BIBLE.txt","r")
 data = f.read()
 test = re.split(' |\n', data)
-test.pop(len(test)-1)
+test.pop(len(test)-1) # it removes the very last blank space, needed just to correctly process the values
 
-###### REQUIRE YOUR ATTENTION ######
-for elem in test:
+row_element = []
+row = []
+
+# The list will contain itemsets for each different sequences that is ended by "-2", with "-1" we determine
+# the end of an itemset
+for elem in test:    
     if(int(elem) != -2 & int(elem) != -1):
-        v_dataset.append(int(elem))
+        row_element.append(int(elem))
+        row.append(row_element)             #  every row is composed by several itemsets (that are list as well)
+        row_element = []                    # row is then made by row_element, every row_element is an itemset
     elif(int(elem) == -2):
-       # modify it in order to start another row
-       exit
+       v_dataset.append(row)
+       row = []
 
 print(v_dataset)
 
