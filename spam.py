@@ -1,6 +1,4 @@
 #Assumptions: a List Data structure has been used to contain the input dataset, intermediate and final results.
-
-
 import re
 import numpy as np
 v_dataset = []
@@ -28,22 +26,9 @@ for elem in test:
 
 print(v_dataset[1])
 
-#n_customers = 4   #SID
-#n_attributes = 2  #a,b,c,d,e,f
-#max_transactions = 5 # number of entries in itemsets cell
+n_customers = 36369   #SID
+n_attributes = 13905  #a,b,c,d,e,f
 
-#for i in range(n_customers):
-   # v_dataset[0].append([])
-    #v_dataset[1].append([])
-
-#v_dataset[0][0] = [0,1,2,3]
-#v_dataset[0][1] = [0]
-#v_dataset[0][2] = [0,1]
-#v_dataset[0][3] = [0]
-#v_dataset[1][0] = [1,3]
-#v_dataset[1][1] = [0,1]
-#v_dataset[1][2] = [0,2]
-#v_dataset[1][3] = [1]
 
 
 def getSupport(v_item):
