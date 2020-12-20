@@ -104,10 +104,9 @@ def spam(dataset, minsup):
             frequent_items_support.append(support)
     for i in range(len(frequent_items)):
         try:
-            frequent_items2 = frequent_items[:] #copying by value;
-            frequent_items2.remove(frequent_items[i])
+            frequent_items2 = frequent_items[i+1:] #copying by value;
         except ValueError:
-            pass
+            frequent_items2 = []
         pat = str(frequent_items[i])+','+':'+str(frequent_items_support[i])
         result = search(dataset[frequent_items[i]], pat, frequent_items, frequent_items2, minsup, result)
 
@@ -131,10 +130,9 @@ def search(v_pat, pat, Sn, In, minsup, mined_sequences):
             Stemp_sup.append(support)
     for i in range(len(Stemp)):
         try:
-            Stemp2 = Stemp[:] # copying by value
-            Stemp2.remove(Stemp[i])
+            Stemp2 = Stemp[i+1:] # copying by value
         except ValueError:
-            pass
+            Stemp2 = []
 
         search(s_extension(v_pat, v_dataset[Stemp[i]]),pat+'_'+str(Stemp[i])+','+':'+str(Stemp_sup[i]), Stemp, Stemp2, minsup, mined_sequences)
 
@@ -145,10 +143,9 @@ def search(v_pat, pat, Sn, In, minsup, mined_sequences):
             Itemp_sup.append(support)
     for i in range(len(Itemp)):
         try:
-            Itemp2 = Itemp[:]
-            Itemp2.remove(Itemp[i])
+            Itemp2 = Itemp[i+1:]
         except ValueError:
-            pass
+            Itemp2 = []
         search(i_extension(v_pat,v_dataset[item]),pat+str(item)+','+':'+str(Itemp_sup[i]), Itemp, Itemp2, minsup, mined_sequences)
 
     return mined_sequences
