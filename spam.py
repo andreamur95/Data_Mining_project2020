@@ -94,51 +94,83 @@ def spam(dataset, minsup):
     print("Minsup:")
     print(minsup)
     frequent_items = []
+    frequent_items_support = []
+
     result = []
     for item_id in range(n_attributes):
-        if getSupport(dataset[item_id]) >= minsup:
+        support = getSupport(dataset[item_id])
+        if  support >= minsup:
             frequent_items.append(item_id)
-    for item in frequent_items:
+            frequent_items_support.append(support)
+    for i in range(len(frequent_items)):
         try:
             frequent_items2 = frequent_items[:] #copying by value;
-            frequent_items2.remove(item)
+            frequent_items2.remove(frequent_items[i])
         except ValueError:
             pass
-        pat = str(item)
-        result = search(dataset[item], pat, frequent_items, frequent_items2, minsup, result)
-    print('\nFrequent sequential patterns mined:')
-    print(result)
+        pat = str(frequent_items[i])+','+':'+str(frequent_items_support[i])
+        result = search(dataset[frequent_items[i]], pat, frequent_items, frequent_items2, minsup, result)
+
+    display_results(result)
+
     return result
 
 # v_pat is defined vertically
 def search(v_pat, pat, Sn, In, minsup, mined_sequences):
     mined_sequences.append(pat)
+    pat = pat.split(":")[0]
     Stemp = []
+    Stemp_sup = []
     Itemp = []
+    Itemp_sup = []
+
     for item in Sn:
-        if getSupport(s_extension(v_pat, v_dataset[item])) >= minsup:
+        support = getSupport(s_extension(v_pat, v_dataset[item]))
+        if support >= minsup:
             Stemp.append(item)
-    for item in Stemp:
+            Stemp_sup.append(support)
+    for i in range(len(Stemp)):
         try:
             Stemp2 = Stemp[:] # copying by value
-            Stemp2.remove(item)
+            Stemp2.remove(Stemp[i])
         except ValueError:
             pass
 
-        search(s_extension(v_pat, v_dataset[item]),pat+"_"+str(item) , Stemp, Stemp2, minsup, mined_sequences)
+        search(s_extension(v_pat, v_dataset[Stemp[i]]),pat+'_'+str(Stemp[i])+','+':'+str(Stemp_sup[i]), Stemp, Stemp2, minsup, mined_sequences)
 
     for item in In:
-        if getSupport(i_extension(v_pat, v_dataset[item])) >= minsup:
+        support = getSupport(i_extension(v_pat, v_dataset[item]))
+        if  support >= minsup:
             Itemp.append(item)
-    for item in Itemp:
+            Itemp_sup.append(support)
+    for i in range(len(Itemp)):
         try:
             Itemp2 = Itemp[:]
-            Itemp2.remove(item)
+            Itemp2.remove(Itemp[i])
         except ValueError:
             pass
-        search(i_extension(v_pat,v_dataset[item]),pat+str(item), Itemp, Itemp2, minsup, mined_sequences)
+        search(i_extension(v_pat,v_dataset[item]),pat+str(item)+','+':'+str(Itemp_sup[i]), Itemp, Itemp2, minsup, mined_sequences)
 
     return mined_sequences
+
+def display_results(mined_sequences):
+    no_of_mined_sequences = len(mined_sequences)
+    print('\nFound %d frequent sequential patterns:\n' % no_of_mined_sequences)
+
+    for i in range(no_of_mined_sequences):
+        mined_sequences[i] = mined_sequences[i].replace(',_','_')
+        mined_sequences[i] = mined_sequences[i].split(':')
+        raw_sequence = mined_sequences[i][0][:-1]
+        support = int(mined_sequences[i][1])
+        relative_support = support/n_customers
+
+        sequence = '{' + raw_sequence.replace('_','},{') + '}'
+
+        print("%d:" % (i+1))
+        print("Sequence: %s" % sequence)
+        print("Absolute support: %d" % support)
+        print("Relative support: %f\n " % relative_support)
+
 
 
 spam(v_dataset, 3)
