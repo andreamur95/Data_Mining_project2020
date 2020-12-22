@@ -123,7 +123,7 @@ def spam(dataset, minsup):
         pat = str(frequent_items[i]+1)+','+':'+str(frequent_items_support[i])
         result = search(dataset, dataset[frequent_items[i]], pat, frequent_items, frequent_items2, minsup, result)
 
-    display_results(result)
+    generate_rules(display_results(result))
 
     return result
 
@@ -165,18 +165,26 @@ def search(v_dataset, v_pat, pat, Sn, In, minsup, mined_sequences):
 
 def display_results(mined_sequences):
     no_of_mined_sequences = len(mined_sequences)
+    raw_sequences = []
+    array_sequences= []
     print('\nFound %d frequent sequential patterns:\n' % no_of_mined_sequences)
+
 
     for i in range(no_of_mined_sequences):
         mined_sequences[i] = mined_sequences[i].replace(',_','_')
         mined_sequences[i] = mined_sequences[i].split(':')
 
-    mined_sequences = sorted(mined_sequences, key=lambda l:l[1], reverse=True) #comment this for sorting via item number
+    #mined_sequences = sorted(mined_sequences, key=lambda l:l[1], reverse=True) #comment this for sorting via item number
 
     for i in range(no_of_mined_sequences):
         raw_sequence = mined_sequences[i][0][:-1]
+        raw_sequences.append(raw_sequence)
+
+
         support = int(mined_sequences[i][1])
         relative_support = support/n_sequences
+
+        array_sequences.append([raw_sequence.split('_'),relative_support])
 
         sequence = '{' + raw_sequence.replace('_','},{') + '}'
 
@@ -185,6 +193,74 @@ def display_results(mined_sequences):
         print("Absolute support: %d" % support)
         print("Relative support: %f\n " % relative_support)
 
+    print(array_sequences[2])
+    return array_sequences
+
+def generate_rules(sequences):
+    rules_list = []
+    for sequence in sequences:
+        seq_len = len(sequence[0])
+        if seq_len < 2:
+            continue
+        else:
+            for i in range(0,seq_len-1,1):
+                lh = sequence[0][:i+1]
+                rh = sequence[0][i+1:]
+                rule_support = sequence[1]
+                lh_support = 0
+                rh_support = 0
+                for i_sequence in sequences:
+                    if (i_sequence[0] == lh):
+                        lh_support = i_sequence[1]
+                        break
+                for j_sequence in sequences:
+                    if (j_sequence[0] == rh):
+                        rh_support = i_sequence[1]
+                        break
+                rule_confidence = rule_support/lh_support
+                rule_lift = rule_confidence/rh_support
+
+                raw_lh = ""
+                raw_rh = ""
+                for item in lh:
+                    raw_lh+='{'
+                    split_item = item.split(',')
+                    for subitem in split_item:
+                        raw_lh+=subitem
+                        raw_lh+=','
+                    raw_lh = raw_lh[:-1]    #removing last comma
+                    raw_lh+='},'
+                raw_lh = raw_lh[:-1]
+
+                for item in rh:
+                    raw_rh+='{'
+                    split_item = item.split(',')
+                    for subitem in split_item:
+                        raw_rh+=subitem
+                        raw_rh+=','
+                    raw_rh = raw_rh[:-1]    #removing last comma
+                    raw_rh+='},'
+                raw_rh = raw_rh[:-1]
+
+
+                rules_list.append({"lh": raw_lh, "rh": raw_rh, "support": rule_support, "confidence": rule_confidence, "lift": rule_lift})
+
+    #rules_list = sorted(rules_list, key=lambda l:l["lift"], reverse=True) # sort by lift
+
+
+    no_of_rules = len(rules_list)
+    print("Found %d sequential rules:" % no_of_rules)
+    for i in range(no_of_rules):
+        rule = rules_list[i]
+        print("\nRule %d:" % (i+1))
+        print("lh: %s" % rule["lh"])
+        print("rh: %s" % rule["rh"])
+        print("Support: %f" % rule["support"])
+        print("Confidence: %f" % rule["confidence"])
+        print("Lift: %f" % rule["lift"])
+
+
+    return rules_list
 
 
 # spam(v_dataset, 3)
