@@ -1,5 +1,7 @@
 #Assumptions: a List Data structure has been used to contain the input dataset, intermediate and final results.
 import re
+from igraph import *
+import cairo
 
 
 # n_sequences = 4   #SID
@@ -247,9 +249,11 @@ def generate_rules(sequences):
 
     #rules_list = sorted(rules_list, key=lambda l:l["lift"], reverse=True) # sort by lift
 
-
+    g = Graph()
     no_of_rules = len(rules_list)
     print("Found %d sequential rules:" % no_of_rules)
+    
+    j = 0
     for i in range(no_of_rules):
         rule = rules_list[i]
         print("\nRule %d:" % (i+1))
@@ -258,10 +262,27 @@ def generate_rules(sequences):
         print("Support: %f" % rule["support"])
         print("Confidence: %f" % rule["confidence"])
         print("Lift: %f" % rule["lift"])
+        # GENERATING NODES AND EDGE FOR DEPENDENCY GRAPH
+        g.add_vertices(2)
+        g.add_edges([(j,j+1)])
+        g.vs[j]["value"] = rule["lh"]
+        g.vs[j]["side"] = "left"
+        g.vs[j+1]["value"] = rule["rh"]
+        g.vs[j+1]["side"] = "right"
+        j += 2
 
+    # PLOTTING
+    g.vs["label"] = g.vs["value"]
+    visual_style = {}
+    visual_style["vertex_size"] = 50
+    visual_style["layout"] = g.layout("kk")    
+    color_dict = {"left": "red", "right": "white"}
+    visual_style["vertex_color"] = [color_dict[side] for side in g.vs["side"]]
+    plot(g, **visual_style)
+    
 
     return rules_list
 
 
 # spam(v_dataset, 3)
-spam(v_dataset2, 400)
+spam(v_dataset2, 500)
