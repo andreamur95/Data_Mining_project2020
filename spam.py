@@ -1,7 +1,5 @@
 #Assumptions: a List Data structure has been used to contain the input dataset, intermediate and final results.
 import re
-from igraph import *
-import cairo
 
 
 # n_sequences = 4   #SID
@@ -24,6 +22,8 @@ import cairo
 # v_dataset[1][1] = [0,1]
 # v_dataset[1][2] = [0,2]
 # v_dataset[1][3] = [1]
+
+from igraph import *
 
 
 f = open("SIGN.txt","r")
@@ -50,6 +50,7 @@ for i in range(n_attributes):
 
 current_pos = 0
 current_seq = 0
+
 
 for item in data:
     if int(item) == -1:
@@ -102,6 +103,31 @@ def i_extension(v_item1, v_item2):
 
     return result
 
+
+
+def make_cmap(v_dataset, minsup):
+
+    S_cmap = []
+    I_cmap = []
+
+    n_attributes = len(v_dataset)
+
+    for i in range(n_attributes):
+        for j in range(n_attributes):
+            if i!=j:
+                if getSupport(s_extension(v_dataset[i],v_dataset[j])) >= minsup:
+                    S_cmap.append(hash(str(i+1)+'_'+str(j+1)))
+
+                if j > i:
+                    if getSupport(i_extension(v_dataset[i],v_dataset[j])) >= minsup:
+                        I_cmap.append(hash(str(i+1)+'_'+str(j+1)))
+            else:
+                continue
+
+    result = (S_cmap,I_cmap)
+    return result
+
+
 def spam(dataset, minsup):
     print ("\nSPAM function call for:")
  #   print("Dataset:")
@@ -112,6 +138,8 @@ def spam(dataset, minsup):
     frequent_items_support = []
 
     result = []
+    cmap = make_cmap(dataset,minsup)
+
     for item_id in range(n_attributes):
         support = getSupport(dataset[item_id])
         if  support >= minsup:
@@ -123,14 +151,14 @@ def spam(dataset, minsup):
         except ValueError:
             frequent_items2 = []
         pat = str(frequent_items[i]+1)+','+':'+str(frequent_items_support[i])
-        result = search(dataset, dataset[frequent_items[i]], pat, frequent_items, frequent_items2, minsup, result)
+        result = search(dataset, dataset[frequent_items[i]], pat, frequent_items, frequent_items2, minsup, result, cmap)
 
     generate_rules(display_results(result))
 
     return result
 
 # v_pat is defined vertically
-def search(v_dataset, v_pat, pat, Sn, In, minsup, mined_sequences):
+def search(v_dataset, v_pat, pat, Sn, In, minsup, mined_sequences, cmap):
     mined_sequences.append(pat)
     pat = pat.split(":")[0]
     Stemp = []
@@ -141,27 +169,31 @@ def search(v_dataset, v_pat, pat, Sn, In, minsup, mined_sequences):
     for item in Sn:
         support = getSupport(s_extension(v_pat, v_dataset[item]))
         if support >= minsup:
-            Stemp.append(item)
-            Stemp_sup.append(support)
+            hashc = hash(str(pat.split('_')[-1].split(',')[-2])+'_'+str(item+1))
+            if hashc in cmap[0]:
+                Stemp.append(item)
+                Stemp_sup.append(support)
     for i in range(len(Stemp)):
         try:
             Stemp2 = Stemp[i+1:] # copying by value
         except ValueError:
             Stemp2 = []
 
-        search(v_dataset, s_extension(v_pat, v_dataset[Stemp[i]]),pat+'_'+str(Stemp[i]+1)+','+':'+str(Stemp_sup[i]), Stemp, Stemp2, minsup, mined_sequences)
+        search(v_dataset, s_extension(v_pat, v_dataset[Stemp[i]]),pat+'_'+str(Stemp[i]+1)+','+':'+str(Stemp_sup[i]), Stemp, Stemp2, minsup, mined_sequences, cmap)
 
     for item in In:
         support = getSupport(i_extension(v_pat, v_dataset[item]))
         if  support >= minsup:
-            Itemp.append(item)
-            Itemp_sup.append(support)
+            hashc = hash(str(pat.split('_')[-1].split(',')[-2])+'_'+str(item+1))
+            if hashc in cmap[1]:
+                Itemp.append(item)
+                Itemp_sup.append(support)
     for i in range(len(Itemp)):
         try:
             Itemp2 = Itemp[i+1:]
         except ValueError:
             Itemp2 = []
-        search(v_dataset, i_extension(v_pat,v_dataset[item]),pat+str(Itemp[i]+1)+','+':'+str(Itemp_sup[i]), Itemp, Itemp2, minsup, mined_sequences)
+        search(v_dataset, i_extension(v_pat,v_dataset[item]),pat+str(Itemp[i]+1)+','+':'+str(Itemp_sup[i]), Itemp, Itemp2, minsup, mined_sequences, cmap)
 
     return mined_sequences
 
@@ -195,7 +227,6 @@ def display_results(mined_sequences):
         print("Absolute support: %d" % support)
         print("Relative support: %f\n " % relative_support)
 
-    print(array_sequences[2])
     return array_sequences
 
 def generate_rules(sequences):
@@ -249,11 +280,9 @@ def generate_rules(sequences):
 
     #rules_list = sorted(rules_list, key=lambda l:l["lift"], reverse=True) # sort by lift
 
-    g = Graph()
+
     no_of_rules = len(rules_list)
     print("Found %d sequential rules:" % no_of_rules)
-    
-    j = 0
     for i in range(no_of_rules):
         rule = rules_list[i]
         print("\nRule %d:" % (i+1))
@@ -262,27 +291,46 @@ def generate_rules(sequences):
         print("Support: %f" % rule["support"])
         print("Confidence: %f" % rule["confidence"])
         print("Lift: %f" % rule["lift"])
+
+    g = Graph()
+    no_of_rules = len(rules_list)
+    print("Found %d sequential rules:" % no_of_rules)
+
+
+    j = 0
+    for i in range(no_of_rules):
+        rule = rules_list[i]
+        print("\nRule %d:" % (i + 1))
+        print("lh: %s" % rule["lh"])
+        print("rh: %s" % rule["rh"])
+        print("Support: %f" % rule["support"])
+        print("Confidence: %f" % rule["confidence"])
+        print("Lift: %f" % rule["lift"])
         # GENERATING NODES AND EDGE FOR DEPENDENCY GRAPH
         g.add_vertices(2)
-        g.add_edges([(j,j+1)])
+        g.add_edges([(j, j + 1)])
         g.vs[j]["value"] = rule["lh"]
         g.vs[j]["side"] = "left"
-        g.vs[j+1]["value"] = rule["rh"]
-        g.vs[j+1]["side"] = "right"
+        g.vs[j + 1]["value"] = rule["rh"]
+        g.vs[j + 1]["side"] = "right"
         j += 2
 
     # PLOTTING
     g.vs["label"] = g.vs["value"]
     visual_style = {}
     visual_style["vertex_size"] = 50
-    visual_style["layout"] = g.layout("kk")    
+    visual_style["layout"] = g.layout("kk")
     color_dict = {"left": "red", "right": "white"}
     visual_style["vertex_color"] = [color_dict[side] for side in g.vs["side"]]
     plot(g, **visual_style)
-    
 
     return rules_list
 
 
+
 # spam(v_dataset, 3)
 spam(v_dataset2, 500)
+
+
+
+
